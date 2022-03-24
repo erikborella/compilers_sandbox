@@ -1,0 +1,6 @@
+public static void main(String[] args) {
+    int a = 10 + 2;
+    int b = a * 1;
+    int b = a * 1;
+    int b = a * 1;
+}
