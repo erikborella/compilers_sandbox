@@ -7,9 +7,12 @@
 
 int main() {
 
-    Lexer* l = lexer_init(CODE_SOURCE_FILE, 64);
+    Lexer* l = lexer_init(CODE_SOURCE_FILE, 8);
 
-    Token t = lexer_getNextToken(l);
+    lexer_getNextToken(l);
+    lexer_getNextToken(l);
+    lexer_getNextToken(l);
+    lexer_getNextToken(l);
 
     lexer_free(l);
 
