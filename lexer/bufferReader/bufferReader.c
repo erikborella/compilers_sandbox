@@ -10,6 +10,8 @@ struct bufferReader {
     size_t bufferSize;
     char* buffer;
     bool loadFirstPart;
+    size_t startPtr;
+    size_t endPtr;
 };
 
 FILE* BR_openFileAsReadOrExitWithError(const char* sourceFilePath) {
@@ -50,6 +52,15 @@ void BR_loadChunk(BufferReader* br) {
     br->loadFirstPart = !br->loadFirstPart;
 }
 
+size_t BR_mod(size_t a, size_t b) {
+    size_t r = a % b;
+    
+    if (r < 0)
+        return r + b;
+    else
+        return r;
+}
+
 BufferReader* bufferReader_init(const char* sourceFilePath, size_t bufferSize) {
     BufferReader* br = (BufferReader*) malloc(sizeof(BufferReader));
 
@@ -59,6 +70,10 @@ BufferReader* bufferReader_init(const char* sourceFilePath, size_t bufferSize) {
         //Double the buffer size to use the double buffer technique
         br->buffer = BR_mallocOrExitWithError(sizeof(char) * (bufferSize * 2));
         br->loadFirstPart = true;
+        br->startPtr = 0;
+        br->endPtr = 0;
+
+        BR_loadChunk(br);
     }
 
     return br;
@@ -68,4 +83,19 @@ void bufferReader_free(BufferReader* br) {
     fclose(br->sourceFile);
     free(br->buffer);
     free(br);
+}
+
+bool bufferReader_isEOF(BufferReader* br) {
+    return br->buffer[br->endPtr] == 0;
+}
+
+char bufferReader_getNext(BufferReader* br) {
+    char currentChar = br->buffer[br->endPtr];
+
+    br->endPtr = BR_mod(br->endPtr + 1, br->bufferSize * 2);
+
+    if (br->endPtr == 0 || br->endPtr == br->bufferSize)
+        BR_loadChunk(br);
+
+    return currentChar;
 }
