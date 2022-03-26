@@ -89,7 +89,7 @@ bool bufferReader_isEOF(BufferReader* br) {
     return br->buffer[br->endPtr] == 0;
 }
 
-char bufferReader_getNext(BufferReader* br) {
+char bufferReader_moveNext(BufferReader* br) {
     char currentChar = br->buffer[br->endPtr];
 
     br->endPtr = BR_mod(br->endPtr + 1, br->bufferSize * 2);
