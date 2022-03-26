@@ -89,13 +89,41 @@ bool bufferReader_isEOF(BufferReader* br) {
     return br->buffer[br->endPtr] == 0;
 }
 
-char bufferReader_moveNext(BufferReader* br) {
-    char currentChar = br->buffer[br->endPtr];
-
+void bufferReader_moveNext(BufferReader* br) {
     br->endPtr = BR_mod(br->endPtr + 1, br->bufferSize * 2);
 
     if (br->endPtr == 0 || br->endPtr == br->bufferSize)
         BR_loadChunk(br);
+}
 
-    return currentChar;
+char bufferReader_getCurrent(BufferReader* br) {
+    return br->buffer[br->endPtr];
+}
+
+char* bufferReader_getSelected(BufferReader* br) {
+    size_t selectedLen;
+    char* selected;
+
+    if (br->endPtr > br->startPtr)
+        selectedLen = br->endPtr - br->startPtr;
+    else
+        selectedLen = br->endPtr - br->startPtr + (br->bufferSize * 2);
+
+    selected = BR_mallocOrExitWithError(sizeof(char) * (selectedLen + 1));
+
+    int i = br->startPtr;
+    int j = 0;
+
+    while (i != br->endPtr) {
+        selected[j] = br->buffer[i];
+        
+        i = BR_mod(i + 1, br->bufferSize * 2);
+        j++;
+    }
+
+    selected[selectedLen] = 0;
+
+    br->startPtr = br->endPtr;
+
+    return selected;
 }
