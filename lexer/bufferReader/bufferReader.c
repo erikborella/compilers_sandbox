@@ -127,3 +127,7 @@ char* bufferReader_getSelected(BufferReader* br) {
 
     return selected;
 }
+
+void bufferReader_ignoreSelected(BufferReader* br) {
+    br->startPtr = br->endPtr;
+}

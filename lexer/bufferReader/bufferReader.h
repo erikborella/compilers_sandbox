@@ -13,5 +13,6 @@ bool bufferReader_isEOF(BufferReader* br);
 void bufferReader_moveNext(BufferReader* br);
 char bufferReader_getCurrent(BufferReader* br);
 char* bufferReader_getSelected(BufferReader* br);
+void bufferReader_ignoreSelected(BufferReader* br);
 
 #endif
