@@ -1,21 +1,12 @@
+CC=gcc
+
 .PHONY: all main clean
 
 all: main clean
 
-main: main.o lexer.o symbolsTable.o bufferReader.o
-	gcc -o a.out main.o lexer.o symbolsTable.o bufferReader.o
-
-main.o: main.c
-	gcc -o main.o main.c -c
-
-lexer.o: lexer/lexer.c
-	gcc -o lexer.o lexer/lexer.c -c
-
-symbolsTable.o: symbolsTable/symbolsTable.c
-	gcc -o symbolsTable.o symbolsTable/symbolsTable.c -c
-
-bufferReader.o: lexer/bufferReader/bufferReader.c
-	gcc -o bufferReader.o lexer/bufferReader/bufferReader.c -c
+main: a.out
+a.out: main.o lexer/lexer.o symbolsTable/symbolsTable.o lexer/bufferReader/bufferReader.o
+	$(CC) -o $@ $+
 
 clean:
-	rm -rf *.o
+	find . -type f -name *.o -delete
