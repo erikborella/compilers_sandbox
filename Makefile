@@ -1,6 +1,6 @@
 CC=gcc
 
-.PHONY: all main clean
+.PHONY: all main clean dist-clean
 
 all: main clean
 
@@ -10,3 +10,6 @@ a.out: main.o lexer/lexer.o symbolsTable/symbolsTable.o lexer/bufferReader/buffe
 
 clean:
 	find . -type f -name *.o -delete
+
+dist-clean: clean
+	rm -rf a.out
