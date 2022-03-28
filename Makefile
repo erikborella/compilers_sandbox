@@ -1,3 +1,5 @@
+.PHONY: all main clean
+
 all: main clean
 
 main: main.o lexer.o symbolsTable.o bufferReader.o
