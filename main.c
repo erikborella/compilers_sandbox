@@ -74,7 +74,10 @@ const char* getTokenTypeAsString(enum tokenType type) {
 }
 
 void printToken(Token t) {
-    printf("Token => type: %s - attr: %d\n", getTokenTypeAsString(t.type), t.attribute);
+    printf("Token => type: %s\n\tposition: L:%ld C:%ld\n\tattr: %d\n\n",
+        getTokenTypeAsString(t.type),
+        t.position.line, t.position.column,
+        t.attribute);
 }
 
 int main() {
