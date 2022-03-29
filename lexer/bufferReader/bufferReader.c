@@ -32,6 +32,7 @@ void* BR_mallocOrExitWithError(size_t size) {
 
     if (m == NULL) {
         fprintf(stderr, "Lexer Error: Unable to allocate %lu bytes\n", size);
+        exit(1);
     }
 
     return m;
