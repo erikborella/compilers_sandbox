@@ -21,6 +21,7 @@ void* ST_mallocOrExitWithError(size_t size) {
 
     if (m == NULL) {
         fprintf(stderr, "Symbols Table Error: Unable to allocate %lu bytes\n", size);
+        exit(1);
     }
 
     return m;
