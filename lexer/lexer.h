@@ -1,11 +1,12 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <stddef.h>
-
 #include "../symbolsTable/symbolsTable.h"
 
+#include <stddef.h>
 #include <stdbool.h>
+
+#include "bufferReader/bufferReader.h"
 
 typedef struct lexer Lexer;
 
@@ -51,6 +52,7 @@ enum tokenType {
 typedef struct {
     enum tokenType type;
     int attribute;
+    FilePosition position;
 } Token;
 
 

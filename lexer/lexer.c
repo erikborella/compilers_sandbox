@@ -22,11 +22,13 @@ Token LX_getNumber(Lexer *l) {
         bufferReader_moveNext(l->bufferReader);
     }
 
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t;
     t.type = NUMBER;
     t.attribute = strtoll(str, NULL, 10);
+    t.position = position;
 
     return t;
 }
@@ -58,10 +60,12 @@ Token LX_getName(Lexer *l) {
         bufferReader_moveNext(l->bufferReader);
     }
 
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t;
     t.type = LX_getNameType(str);
+    t.position = position;
     
     if (t.type == ID)
         t.attribute = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
@@ -82,11 +86,13 @@ Token LX_getString(Lexer *l) {
         bufferReader_moveNext(l->bufferReader);
     }
 
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t;
     t.type = STRING;
     t.attribute = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
+    t.position = position;
 
     bufferReader_moveNext(l->bufferReader);
     bufferReader_ignoreSelected(l->bufferReader);
@@ -138,6 +144,9 @@ Token LX_getSymbol(Lexer *l) {
             exit(1);
             break;
     }
+
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    t.position = position;
 
     bufferReader_ignoreSelected(l->bufferReader);
 
@@ -213,6 +222,9 @@ Token LX_getOperator(Lexer *l) {
         }
     }
 
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    t.position = position;
+
     bufferReader_ignoreSelected(l->bufferReader);
 
     return t;
@@ -231,6 +243,9 @@ Token LX_getAttributionOrEqual(Lexer *l) {
     else {
         t.type = S_ATTRIBUTION;
     }
+
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    t.position = position;
 
     bufferReader_ignoreSelected(l->bufferReader);
 
