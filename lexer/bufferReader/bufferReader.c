@@ -12,6 +12,8 @@ struct bufferReader {
     bool loadFirstPart;
     size_t startPtr;
     size_t endPtr;
+    FilePosition startPosition;
+    FilePosition endPosition;
 };
 
 FILE* BR_openFileAsReadOrExitWithError(const char* sourceFilePath) {
@@ -61,17 +63,37 @@ size_t BR_mod(size_t a, size_t b) {
         return r;
 }
 
+void BR_finishSelection(BufferReader* br) {
+    br->startPtr = br->endPtr;
+    br->startPosition = br->endPosition;
+}
+
+void BR_updateEndPosition(BufferReader* br, char ch) {
+    if (ch == '\n') {
+        br->endPosition.line++;
+        br->endPosition.column = 0;
+    }
+    else {
+        br->endPosition.column++;
+    }
+}
+
 BufferReader* bufferReader_init(const char* sourceFilePath, size_t bufferSize) {
     BufferReader* br = (BufferReader*) malloc(sizeof(BufferReader));
 
     if (br != NULL) {
         br->sourceFile = BR_openFileAsReadOrExitWithError(sourceFilePath);
         br->bufferSize = bufferSize;
+
         //Double the buffer size to use the double buffer technique
         br->buffer = BR_mallocOrExitWithError(sizeof(char) * (bufferSize * 2));
         br->loadFirstPart = true;
         br->startPtr = 0;
         br->endPtr = 0;
+
+        FilePosition startFile =  {.line = 1, .column = 1};
+        br->startPosition = startFile;
+        br->endPosition = startFile;
 
         BR_loadChunk(br);
     }
@@ -91,6 +113,9 @@ bool bufferReader_isEOF(BufferReader* br) {
 
 void bufferReader_moveNext(BufferReader* br) {
     br->endPtr = BR_mod(br->endPtr + 1, br->bufferSize * 2);
+
+    char current = bufferReader_getCurrent(br);
+    BR_updateEndPosition(br, current);
 
     if (br->endPtr == 0 || br->endPtr == br->bufferSize)
         BR_loadChunk(br);
@@ -123,11 +148,15 @@ char* bufferReader_getSelected(BufferReader* br) {
 
     selected[selectedLen] = 0;
 
-    br->startPtr = br->endPtr;
+    BR_finishSelection(br);
 
     return selected;
 }
 
 void bufferReader_ignoreSelected(BufferReader* br) {
-    br->startPtr = br->endPtr;
+    BR_finishSelection(br);
+}
+
+FilePosition bufferReader_getPosition(BufferReader* br) {
+    return br->startPosition;
 }
