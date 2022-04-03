@@ -14,13 +14,18 @@ const struct LX_s_reservedWords {
     char* str;
     enum tokenType type;
 } LX_reservedWords[] = {
-    {.str = "public", .type = R_PUBLIC},
-    {.str = "static", .type = R_STATIC},
     {.str = "void", .type = R_VOID},
-    {.str = "int", .type = R_INT},
+    {.str = "main", .type = R_MAIN},
     {.str = "if", .type = R_IF},
     {.str = "else", .type = R_ELSE},
     {.str = "for", .type = R_FOR},
+    {.str = "while", .type = R_WHILE},
+    {.str = "int", .type = R_INT},
+    {.str = "float", .type = R_FLOAT},
+    {.str = "char", .type = R_CHAR},
+    {.str = "scanf", .type = R_SCANF},
+    {.str = "print", .type = R_PRINT},
+    {.str = "return", .type = R_RETURN},
 };
 
 const size_t LX_sizeReservedWords = 
@@ -42,7 +47,7 @@ Token LX_getNumber(Lexer *l) {
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t;
-    t.type = NUM_INT;
+    t.type = T_NUM_INT;
     t.attribute = strtoll(str, NULL, 10);
     t.position = position;
 
@@ -57,7 +62,7 @@ enum tokenType LX_getNameType(char* str) {
             return reservedWord.type;
     }
 
-    return ID;
+    return T_ID;
 }
 
 Token LX_getName(Lexer *l) {
@@ -75,7 +80,7 @@ Token LX_getName(Lexer *l) {
     t.type = LX_getNameType(str);
     t.position = position;
     
-    if (t.type == ID)
+    if (t.type == T_ID)
         t.attribute = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
     else
         t.attribute = 0;
@@ -98,7 +103,7 @@ Token LX_getString(Lexer *l) {
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t;
-    t.type = STRING;
+    t.type = T_STRING;
     t.attribute = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
     t.position = position;
 

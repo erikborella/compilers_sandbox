@@ -11,22 +11,29 @@
 typedef struct lexer Lexer;
 
 /*
+T: Type
 R: Reserved
 S: Symbol
 O: Operator
+C: Commentary
 */
 enum tokenType {
-    ID,
-    NUM_INT,
-    NUM_DEC,
-    STRING,
-    R_PUBLIC,
-    R_STATIC,
+    T_ID,
+    T_NUM_INT,
+    T_NUM_DEC,
+    T_STRING,
     R_VOID,
-    R_INT,
+    R_MAIN,
     R_IF,
     R_ELSE,
     R_FOR,
+    R_WHILE,
+    R_INT,
+    R_FLOAT,
+    R_CHAR,
+    R_SCANF,
+    R_PRINT,
+    R_RETURN,
     S_OPEN_PARENTHESIS,
     S_CLOSE_PARENTHESIS,
     S_OPEN_SQUARE_BRACKETS,
@@ -48,6 +55,8 @@ enum tokenType {
     O_GREATER_EQUAL,
     O_INCREMENT,
     O_DECREMENT,
+    C_LINE_COMMENT,
+    C_BLOCK_COMMENT,
 };
 
 typedef struct {
