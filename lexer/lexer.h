@@ -17,7 +17,8 @@ O: Operator
 */
 enum tokenType {
     ID,
-    NUMBER,
+    NUM_INT,
+    NUM_DEC,
     STRING,
     R_PUBLIC,
     R_STATIC,

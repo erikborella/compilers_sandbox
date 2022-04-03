@@ -42,7 +42,7 @@ Token LX_getNumber(Lexer *l) {
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t;
-    t.type = NUMBER;
+    t.type = NUM_INT;
     t.attribute = strtoll(str, NULL, 10);
     t.position = position;
 
@@ -52,7 +52,7 @@ Token LX_getNumber(Lexer *l) {
 enum tokenType LX_getNameType(char* str) {
     for (int i = 0; i < LX_sizeReservedWords; i++) {
         const struct LX_s_reservedWords reservedWord = LX_reservedWords[i];
-        
+
         if (strcmp(reservedWord.str, str) == 0)
             return reservedWord.type;
     }
