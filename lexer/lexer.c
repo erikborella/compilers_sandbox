@@ -10,6 +10,22 @@
 #include "bufferReader/bufferReader.h"
 #include "../symbolsTable/symbolsTable.h"
 
+const struct LX_s_reservedWords {
+    char* str;
+    enum tokenType type;
+} LX_reservedWords[] = {
+    {.str = "public", .type = R_PUBLIC},
+    {.str = "static", .type = R_STATIC},
+    {.str = "void", .type = R_VOID},
+    {.str = "int", .type = R_INT},
+    {.str = "if", .type = R_IF},
+    {.str = "else", .type = R_ELSE},
+    {.str = "for", .type = R_FOR},
+};
+
+const size_t LX_sizeReservedWords = 
+    sizeof(LX_reservedWords) / sizeof(struct LX_s_reservedWords);
+
 struct lexer {
     BufferReader* bufferReader;
     SymbolsTable* symbolsTable;  
@@ -34,22 +50,14 @@ Token LX_getNumber(Lexer *l) {
 }
 
 enum tokenType LX_getNameType(char* str) {
-    if (strcmp(str, "public") == 0)
-        return R_PUBLIC;
-    else if (strcmp(str, "static") == 0)
-        return R_STATIC;
-    else if (strcmp(str, "void") == 0)
-        return R_VOID;
-    else if (strcmp(str, "int") == 0)
-        return R_INT;
-    else if (strcmp(str, "if") == 0)
-        return R_IF;
-    else if (strcmp(str, "else") == 0)
-        return R_ELSE;
-    else if (strcmp(str, "for") == 0)
-        return R_FOR;
-    else
-        return ID;
+    for (int i = 0; i < LX_sizeReservedWords; i++) {
+        const struct LX_s_reservedWords reservedWord = LX_reservedWords[i];
+        
+        if (strcmp(reservedWord.str, str) == 0)
+            return reservedWord.type;
+    }
+
+    return ID;
 }
 
 Token LX_getName(Lexer *l) {
