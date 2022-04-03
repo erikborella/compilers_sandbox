@@ -11,17 +11,18 @@
 typedef struct lexer Lexer;
 
 /*
-T: Type
+I: Identifier
+V: Value Type
 R: Reserved
 S: Symbol
 O: Operator
 C: Commentary
 */
 enum tokenType {
-    T_ID,
-    T_NUM_INT,
-    T_NUM_DEC,
-    T_STRING,
+    I_ID,
+    V_NUM_INT,
+    V_NUM_FLOAT,
+    V_STRING,
     R_VOID,
     R_MAIN,
     R_IF,

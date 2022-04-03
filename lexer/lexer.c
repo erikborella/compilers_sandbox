@@ -47,7 +47,7 @@ Token LX_getNumber(Lexer *l) {
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t;
-    t.type = T_NUM_INT;
+    t.type = V_NUM_INT;
     t.attribute = strtoll(str, NULL, 10);
     t.position = position;
 
@@ -62,7 +62,7 @@ enum tokenType LX_getNameType(char* str) {
             return reservedWord.type;
     }
 
-    return T_ID;
+    return I_ID;
 }
 
 Token LX_getName(Lexer *l) {
@@ -80,7 +80,7 @@ Token LX_getName(Lexer *l) {
     t.type = LX_getNameType(str);
     t.position = position;
     
-    if (t.type == T_ID)
+    if (t.type == I_ID)
         t.attribute = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
     else
         t.attribute = 0;
@@ -103,7 +103,7 @@ Token LX_getString(Lexer *l) {
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t;
-    t.type = T_STRING;
+    t.type = V_STRING;
     t.attribute = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
     t.position = position;
 

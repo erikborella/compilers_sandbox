@@ -8,13 +8,13 @@
 
 const char* getTokenTypeAsString(enum tokenType type) {
     switch (type) {
-        case T_ID:
+        case I_ID:
             return "T_ID";
-        case T_NUM_INT:
+        case V_NUM_INT:
             return "T_NUM_INT";
-        case T_NUM_DEC:
+        case V_NUM_FLOAT:
             return "T_NUM_DEC";
-        case T_STRING:
+        case V_STRING:
             return "T_STRING";
         case R_VOID:
             return "R_VOID";
