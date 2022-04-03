@@ -52,6 +52,8 @@ void LX_throwError(Lexer *l, const char* msg, ...) {
     exit(1);
 }
 
+#pragma region NUMBER
+
 void LX_moveWhileIsNumber(Lexer* l) {
     while (!bufferReader_isEOF(l->bufferReader) && isdigit(bufferReader_getCurrent(l->bufferReader))) {
         bufferReader_moveNext(l->bufferReader);
@@ -112,6 +114,10 @@ Token LX_getNumber(Lexer *l) {
     }
 }
 
+#pragma endregion
+
+#pragma region NAME
+
 enum tokenType LX_getNameType(char* str) {
     for (int i = 0; i < LX_sizeReservedWords; i++) {
         const struct LX_s_reservedWords reservedWord = LX_reservedWords[i];
@@ -147,6 +153,8 @@ Token LX_getName(Lexer *l) {
 
     return t;
 }
+
+#pragma endregion
 
 Token LX_getString(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
@@ -405,6 +413,8 @@ Token LX_getSlashToken(Lexer *l) {
 
 #pragma endregion
 
+#pragma region TAD METHODS
+
 Lexer* lexer_init(const char* sourceFilePath, size_t bufferSize, SymbolsTable* symbolsTable) {
     Lexer* l = (Lexer*) malloc(sizeof(Lexer));
 
@@ -471,3 +481,5 @@ void lexer_free(Lexer* l) {
     bufferReader_free(l->bufferReader);
     free(l);
 }
+
+#pragma endregion
