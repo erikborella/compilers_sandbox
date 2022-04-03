@@ -323,6 +323,88 @@ Token LX_getAttributionOrEqual(Lexer *l) {
     return t;
 }
 
+#pragma region SLASH
+
+Token LX_getLineComment(Lexer *l) {
+    bufferReader_moveNext(l->bufferReader);
+
+    while (!bufferReader_isEOF(l->bufferReader) && bufferReader_getCurrent(l->bufferReader) != '\n')
+        bufferReader_moveNext(l->bufferReader);
+
+    bufferReader_moveNext(l->bufferReader);
+    
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    bufferReader_ignoreSelected(l->bufferReader);
+
+    Token t = {
+        .type = C_LINE_COMMENT,
+        .attribute.INT_ATTR = 0,
+        .position = position
+    };
+
+    return t;
+}
+
+Token LX_getBlockComment(Lexer *l) {
+    bufferReader_moveNext(l->bufferReader);
+
+    while (!bufferReader_isEOF(l->bufferReader)) {
+        bufferReader_moveNext(l->bufferReader);
+
+        const char current = bufferReader_getCurrent(l->bufferReader);
+
+        if (current == '*') {
+            bufferReader_moveNext(l->bufferReader);
+            const char next = bufferReader_getCurrent(l->bufferReader);
+
+            if (bufferReader_isEOF(l->bufferReader) || next == '/') {
+                bufferReader_moveNext(l->bufferReader);
+                break;
+            }
+        }
+    }
+
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    bufferReader_ignoreSelected(l->bufferReader);
+
+    Token t = {
+        .type = C_BLOCK_COMMENT,
+        .attribute.INT_ATTR = 0,
+        .position = position,
+    };
+
+    return t;
+}
+
+Token LX_getDivideOperator(Lexer *l) {
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    bufferReader_ignoreSelected(l->bufferReader);
+
+
+    Token t = {
+        .type = O_DIVIDE,
+        .attribute.INT_ATTR = 0,
+        .position = position,
+    };
+
+    return t;
+}
+
+Token LX_getSlashToken(Lexer *l) {
+    bufferReader_moveNext(l->bufferReader);
+
+    const char current = bufferReader_getCurrent(l->bufferReader);
+
+    if (current == '/')
+        return LX_getLineComment(l);
+    else if (current == '*')
+        return LX_getBlockComment(l);
+    else
+        return LX_getDivideOperator(l);
+}
+
+#pragma endregion
+
 Lexer* lexer_init(const char* sourceFilePath, size_t bufferSize, SymbolsTable* symbolsTable) {
     Lexer* l = (Lexer*) malloc(sizeof(Lexer));
 
@@ -353,6 +435,9 @@ Token lexer_getNextToken(Lexer *l) {
         }
         else if (current == '=') {
             t = LX_getAttributionOrEqual(l);
+        }
+        else if (current == '/') {
+            t = LX_getSlashToken(l);
         }
         else if (LX_isOperator(current)) {
             t = LX_getOperator(l);
