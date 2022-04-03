@@ -9,13 +9,13 @@
 const char* getTokenTypeAsString(enum tokenType type) {
     switch (type) {
         case I_ID:
-            return "T_ID";
+            return "I_ID";
         case V_NUM_INT:
-            return "T_NUM_INT";
+            return "V_NUM_INT";
         case V_NUM_FLOAT:
-            return "T_NUM_DEC";
+            return "V_NUM_FLOAT";
         case V_STRING:
-            return "T_STRING";
+            return "V_STRING";
         case R_VOID:
             return "R_VOID";
         case R_MAIN:
@@ -90,10 +90,18 @@ const char* getTokenTypeAsString(enum tokenType type) {
 }
 
 void printToken(Token t) {
-    printf("Token => type: %s\n\tposition: L:%ld C:%ld\n\tattr: %d\n\n",
-        getTokenTypeAsString(t.type),
-        t.position.line, t.position.column,
-        t.attribute);
+    if (t.type == V_NUM_FLOAT) {
+        printf("Token => type: %s\n\tposition: L:%ld C:%ld\n\tattr: %f\n\n",
+            getTokenTypeAsString(t.type),
+            t.position.line, t.position.column,
+            t.attribute.FLOAT_ATTR);
+    }
+    else {
+        printf("Token => type: %s\n\tposition: L:%ld C:%ld\n\tattr: %d\n\n",
+            getTokenTypeAsString(t.type),
+            t.position.line, t.position.column,
+            t.attribute.INT_ATTR);
+    }
 }
 
 int main() {
@@ -104,7 +112,7 @@ int main() {
 
     while (lexer_hasNext(l)) {
         Token t = lexer_getNextToken(l);
-        printToken(t);
+        //printToken(t);
     }
 
     lexer_free(l);

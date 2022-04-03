@@ -6,10 +6,10 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "bufferReader/bufferReader.h"
 #include "../symbolsTable/symbolsTable.h"
-
 const struct LX_s_reservedWords {
     char* str;
     enum tokenType type;
@@ -36,22 +36,80 @@ struct lexer {
     SymbolsTable* symbolsTable;  
 };
 
-Token LX_getNumber(Lexer *l) {
-    bufferReader_moveNext(l->bufferReader);
+void LX_throwError(Lexer *l, const char* msg, ...) {
+    bufferReader_ignoreSelected(l->bufferReader);
+    FilePosition errorPosition = bufferReader_getPosition(l->bufferReader);
 
+    fprintf(stderr, "Lexer Error -> L:%ld C:%ld: ",
+        errorPosition.line, errorPosition.column);
+
+    va_list arg_ptr;
+
+    va_start(arg_ptr, msg);
+    vfprintf(stderr, msg, arg_ptr);
+    va_end(arg_ptr);
+
+    exit(1);
+}
+
+void LX_moveWhileIsNumber(Lexer* l) {
     while (!bufferReader_isEOF(l->bufferReader) && isdigit(bufferReader_getCurrent(l->bufferReader))) {
         bufferReader_moveNext(l->bufferReader);
     }
+    
+    const char current = bufferReader_getCurrent(l->bufferReader);
+
+    if (isalpha(current))
+        LX_throwError(l, "Expected a number or '.', but found a letter '%c'\n", current);
+}
+
+Token LX_getFloatNumber(Lexer *l) {
+    bufferReader_moveNext(l->bufferReader);
+
+    char current = bufferReader_getCurrent(l->bufferReader);
+
+    if (!isdigit(current))
+        LX_throwError(l, "Expected a number after '.', but found '%c'\n", current);
+
+    LX_moveWhileIsNumber(l);
 
     FilePosition position = bufferReader_getPosition(l->bufferReader);
     char *str = bufferReader_getSelected(l->bufferReader);
+    
+    Token t = {
+        .type = V_NUM_FLOAT,
+        .attribute.FLOAT_ATTR = strtod(str, NULL),
+        .position = position
+    };
 
-    Token t;
-    t.type = V_NUM_INT;
-    t.attribute = strtoll(str, NULL, 10);
-    t.position = position;
-
+    free(str);
     return t;
+}
+
+Token LX_getIntNumber(Lexer *l) {
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    char *str = bufferReader_getSelected(l->bufferReader);
+
+    Token t = {
+        .type = V_NUM_INT,
+        .attribute.INT_ATTR = strtoll(str, NULL, 10),
+        .position = position
+    };
+
+    free(str);
+    return t;
+}
+
+Token LX_getNumber(Lexer *l) {
+    bufferReader_moveNext(l->bufferReader);
+
+    LX_moveWhileIsNumber(l);
+
+    if (bufferReader_getCurrent(l->bufferReader) == '.')
+        return LX_getFloatNumber(l);
+    else {
+        return LX_getIntNumber(l);
+    }
 }
 
 enum tokenType LX_getNameType(char* str) {
@@ -81,9 +139,9 @@ Token LX_getName(Lexer *l) {
     t.position = position;
     
     if (t.type == I_ID)
-        t.attribute = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
+        t.attribute.INT_ATTR = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
     else
-        t.attribute = 0;
+        t.attribute.INT_ATTR = 0;
 
     free(str);
 
@@ -104,7 +162,7 @@ Token LX_getString(Lexer *l) {
 
     Token t;
     t.type = V_STRING;
-    t.attribute = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
+    t.attribute.INT_ATTR = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
     t.position = position;
 
     bufferReader_moveNext(l->bufferReader);
@@ -121,7 +179,7 @@ Token LX_getSymbol(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     Token t;
-    t.attribute = 0;
+    t.attribute.INT_ATTR = 0;
 
     switch (symbol) {
         case '(':
@@ -178,7 +236,7 @@ bool LX_isOperator(char ch) {
 Token LX_getOperator(Lexer *l) {
     char current = bufferReader_getCurrent(l->bufferReader);
     Token t;
-    t.attribute = 0;
+    t.attribute.INT_ATTR = 0;
 
     bufferReader_moveNext(l->bufferReader);
     
@@ -245,7 +303,7 @@ Token LX_getOperator(Lexer *l) {
 
 Token LX_getAttributionOrEqual(Lexer *l) {
     Token t;
-    t.attribute = 0;
+    t.attribute.INT_ATTR = 0;
 
     bufferReader_moveNext(l->bufferReader);
 
@@ -315,6 +373,12 @@ Token lexer_getNextToken(Lexer *l) {
 }
 
 bool lexer_hasNext(Lexer *l) {
+    while (!bufferReader_isEOF(l->bufferReader) && bufferReader_getCurrent(l->bufferReader) == '\n') {
+        bufferReader_moveNext(l->bufferReader);
+    }
+
+    bufferReader_ignoreSelected(l->bufferReader);
+
     return !bufferReader_isEOF(l->bufferReader);
 }
 
