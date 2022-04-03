@@ -8,26 +8,38 @@
 
 const char* getTokenTypeAsString(enum tokenType type) {
     switch (type) {
-        case ID:
-            return "ID";
-        case NUMBER:
-            return "NUMBER";
-        case STRING:
-            return "STRING";
-        case R_PUBLIC:
-            return "R_PUBLIC";
-        case R_STATIC:
-            return "R_STATIC";
+        case T_ID:
+            return "T_ID";
+        case T_NUM_INT:
+            return "T_NUM_INT";
+        case T_NUM_DEC:
+            return "T_NUM_DEC";
+        case T_STRING:
+            return "T_STRING";
         case R_VOID:
             return "R_VOID";
-        case R_INT:
-            return "R_INT";
+        case R_MAIN:
+            return "R_MAIN";
         case R_IF:
             return "R_IF";
         case R_ELSE:
             return "R_ELSE";
         case R_FOR:
             return "R_FOR";
+        case R_WHILE:
+            return "R_WHILE";
+        case R_INT:
+            return "R_INT";
+        case R_FLOAT:
+            return "R_FLOAT";
+        case R_CHAR:
+            return "R_CHAR";
+        case R_SCANF:
+            return "R_SCANF";
+        case R_PRINT:
+            return "R_PRINT";
+        case R_RETURN:
+            return "R_RETURN";
         case S_OPEN_PARENTHESIS:
             return "S_OPEN_PARENTHESIS";
         case S_CLOSE_PARENTHESIS:
@@ -70,6 +82,10 @@ const char* getTokenTypeAsString(enum tokenType type) {
             return "O_INCREMENT";
         case O_DECREMENT:
             return "O_DECREMENT";
+        case C_LINE_COMMENT:
+            return "C_LINE_COMMENT";
+        case C_BLOCK_COMMENT:
+            return "C_BLOCK_COMMENT";
     }
 }
 
