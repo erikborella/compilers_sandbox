@@ -232,104 +232,81 @@ Token LX_getSymbol(Lexer *l) {
     return t;
 }
 
-bool LX_isOperator(char ch) {
-    return ch == '+' ||
-           ch == '-' ||
-           ch == '*' ||
-           ch == '/' ||
-           ch == '<' ||
-           ch == '>';
-}
+#pragma region PLUS
 
-Token LX_getOperator(Lexer *l) {
-    char current = bufferReader_getCurrent(l->bufferReader);
-    Token t;
-    t.attribute.INT_ATTR = 0;
-
+Token LX_getPlusToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
-    
-    if ((current == '<' || current == '>') && bufferReader_getCurrent(l->bufferReader) == '=') {
-        bufferReader_moveNext(l->bufferReader);
 
-        switch (current) {
-            case '<':
-                t.type = O_LESS_EQUAL;
-                break;
-            case '>':
-                t.type = O_GREATER_EQUAL;
-                break;
+    const char current = bufferReader_getCurrent(l->bufferReader);
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
 
-            default:
-                fprintf(stderr, "Lexer Error: This erro should never happen\n");
-                exit(1);
-                break;
-        }
-    }
-    else if (current == '+' && bufferReader_getCurrent(l->bufferReader) == '+') {
+    Token t = {
+        .attribute.INT_ATTR = 0,
+        .position = position
+    };
+
+    if (current == '+') {
         bufferReader_moveNext(l->bufferReader);
         t.type = O_INCREMENT;
     }
-    else if (current == '-' && bufferReader_getCurrent(l->bufferReader) == '-') {
+    else
+        t.type = O_ADD;
+
+    bufferReader_ignoreSelected(l->bufferReader);
+
+    return t;
+}
+
+#pragma endregion
+
+#pragma region MINUS
+
+Token LX_getMinusToken(Lexer *l) {
+    bufferReader_moveNext(l->bufferReader);
+
+    const char current = bufferReader_getCurrent(l->bufferReader);
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+
+    Token t = {
+        .attribute.INT_ATTR = 0,
+        .position = position
+    };
+
+    if (current == '-') {
         bufferReader_moveNext(l->bufferReader);
         t.type = O_DECREMENT;
     }
-    else {
-        switch (current) {
-            case '+':
-                t.type = O_ADD;
-                break;
-            case '-':
-                t.type = O_SUBTRACT;
-                break;
-            case '*':
-                t.type = O_MULTIPLY;
-                break;
-            case '/':
-                t.type = O_SUBTRACT;
-                break;
-            case '<':
-                t.type = O_LESS;
-                break;
-            case '>':
-                t.type = O_GREATER;
-                break;
-
-            default:
-                fprintf(stderr, "Lexer Error: This erro should never happen\n");
-                exit(1);
-                break;
-        }
-    }
-
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
-    t.position = position;
+    else
+        t.type = O_SUBTRACT;
 
     bufferReader_ignoreSelected(l->bufferReader);
 
     return t;
 }
 
-Token LX_getAttributionOrEqual(Lexer *l) {
-    Token t;
-    t.attribute.INT_ATTR = 0;
+#pragma endregion
 
+#pragma region ASTERISK
+
+Token LX_getAsteriskToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
-    if (bufferReader_getCurrent(l->bufferReader) == '=') {
-        t.type = O_EQUAL;
-        bufferReader_moveNext(l->bufferReader);
-    }
-    else {
-        t.type = S_ATTRIBUTION;
-    }
-
+    const char current = bufferReader_getCurrent(l->bufferReader);
     FilePosition position = bufferReader_getPosition(l->bufferReader);
-    t.position = position;
+
+    Token t = {
+        .attribute.INT_ATTR = 0,
+        .position = position
+    };
+
+    t.type = O_MULTIPLY;
 
     bufferReader_ignoreSelected(l->bufferReader);
 
     return t;
 }
+
+#pragma endregion
 
 #pragma region SLASH
 
@@ -413,6 +390,87 @@ Token LX_getSlashToken(Lexer *l) {
 
 #pragma endregion
 
+#pragma region EQUAL
+
+Token LX_getEqualToken(Lexer *l) {
+    bufferReader_moveNext(l->bufferReader);
+
+    const char current = bufferReader_getCurrent(l->bufferReader);
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+
+    Token t = {
+        .attribute.INT_ATTR = 0,
+        .position = position
+    };
+
+    if (current == '=') {
+        t.type = O_EQUAL;
+        bufferReader_moveNext(l->bufferReader);
+    } 
+    else
+        t.type = S_ATTRIBUTION;
+
+    bufferReader_ignoreSelected(l->bufferReader);
+
+    return t;
+}
+
+#pragma endregion
+
+#pragma region GREATER
+
+Token LX_getGreaterToken(Lexer *l) {
+    bufferReader_moveNext(l->bufferReader);
+
+    const char current = bufferReader_getCurrent(l->bufferReader);
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+
+    Token t = {
+        .attribute.INT_ATTR = 0,
+        .position = position
+    };
+
+    if (current == '=') {
+        t.type = O_GREATER_EQUAL;
+        bufferReader_moveNext(l->bufferReader);
+    } 
+    else
+        t.type = O_GREATER;
+
+    bufferReader_ignoreSelected(l->bufferReader);
+
+    return t;
+}
+
+#pragma endregion
+
+#pragma region LESS
+
+Token LX_getLessToken(Lexer *l) {
+     bufferReader_moveNext(l->bufferReader);
+
+    const char current = bufferReader_getCurrent(l->bufferReader);
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+
+    Token t = {
+        .attribute.INT_ATTR = 0,
+        .position = position
+    };
+
+    if (current == '=') {
+        t.type = O_LESS_EQUAL;
+        bufferReader_moveNext(l->bufferReader);
+    } 
+    else
+        t.type = O_LESS;
+
+    bufferReader_ignoreSelected(l->bufferReader);
+
+    return t;
+}
+
+#pragma endregion
+
 #pragma region TAD METHODS
 
 Lexer* lexer_init(const char* sourceFilePath, size_t bufferSize, SymbolsTable* symbolsTable) {
@@ -443,14 +501,26 @@ Token lexer_getNextToken(Lexer *l) {
         else if (current == '\"') {
             t = LX_getString(l);
         }
-        else if (current == '=') {
-            t = LX_getAttributionOrEqual(l);
+        else if (current == '+') {
+            t = LX_getPlusToken(l);
+        }
+        else if (current == '-') {
+            t = LX_getMinusToken(l);
+        }
+        else if (current == '*') {
+            t = LX_getAsteriskToken(l);
         }
         else if (current == '/') {
             t = LX_getSlashToken(l);
         }
-        else if (LX_isOperator(current)) {
-            t = LX_getOperator(l);
+        else if (current == '=') {
+            t = LX_getEqualToken(l);
+        }
+        else if (current == '>') {
+            t = LX_getGreaterToken(l);
+        }
+        else if (current == '<') {
+            t = LX_getLessToken(l);
         }
         else if (ispunct(current)) {
             t = LX_getSymbol(l);
