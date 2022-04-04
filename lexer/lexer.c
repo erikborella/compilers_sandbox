@@ -181,6 +181,8 @@ Token LX_getString(Lexer *l) {
     return t;
 }
 
+#pragma region SYMBOLS
+
 Token LX_getSymbol(Lexer *l) {
     char symbol = bufferReader_getCurrent(l->bufferReader);
 
@@ -231,6 +233,8 @@ Token LX_getSymbol(Lexer *l) {
 
     return t;
 }
+
+#pragma endregion
 
 #pragma region PLUS
 
@@ -492,44 +496,54 @@ Token lexer_getNextToken(Lexer *l) {
         tokenFound = true;
         char current = bufferReader_getCurrent(l->bufferReader);
 
-        if (isdigit(current)) {
-            t = LX_getNumber(l);
-        }
-        else if (isalpha(current)) {
-            t = LX_getName(l);
-        }
-        else if (current == '\"') {
-            t = LX_getString(l);
-        }
-        else if (current == '+') {
-            t = LX_getPlusToken(l);
-        }
-        else if (current == '-') {
-            t = LX_getMinusToken(l);
-        }
-        else if (current == '*') {
-            t = LX_getAsteriskToken(l);
-        }
-        else if (current == '/') {
-            t = LX_getSlashToken(l);
-        }
-        else if (current == '=') {
-            t = LX_getEqualToken(l);
-        }
-        else if (current == '>') {
-            t = LX_getGreaterToken(l);
-        }
-        else if (current == '<') {
-            t = LX_getLessToken(l);
-        }
-        else if (ispunct(current)) {
-            t = LX_getSymbol(l);
-        }
-        else {
-            bufferReader_moveNext(l->bufferReader);
-            bufferReader_ignoreSelected(l->bufferReader);
-
-            tokenFound = false;
+        switch (current) {
+            case '\"':
+                t = LX_getString(l);
+                break;
+                
+            case '+':
+                t = LX_getPlusToken(l);
+                break;
+                
+            case '-':
+                t = LX_getMinusToken(l);
+                break;
+                
+            case '*':
+                t = LX_getAsteriskToken(l);
+                break;
+                
+            case '/':
+                t = LX_getSlashToken(l);
+                break;
+                
+            case '=':
+                t = LX_getEqualToken(l);
+                break;
+                
+            case '>':
+                t = LX_getGreaterToken(l);
+                break;
+                
+            case '<':
+                t = LX_getLessToken(l);
+                break;
+                
+            default:
+                if (isdigit(current))
+                    t = LX_getNumber(l);
+                else if (isalpha(current))
+                    t = LX_getName(l);
+                else if (ispunct(current))
+                    t = LX_getSymbol(l);
+                else {
+                    bufferReader_moveNext(l->bufferReader);
+                    bufferReader_ignoreSelected(l->bufferReader);
+    
+                    tokenFound = false;
+                }
+                break;
+                
         }
     } while (!tokenFound);
     
