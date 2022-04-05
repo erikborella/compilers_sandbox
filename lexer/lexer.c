@@ -140,9 +140,10 @@ Token LX_getName(Lexer *l) {
     FilePosition position = bufferReader_getPosition(l->bufferReader);
     char *str = bufferReader_getSelected(l->bufferReader);
 
-    Token t;
-    t.type = LX_getNameType(str);
-    t.position = position;
+    Token t = {
+        .type = LX_getNameType(str),
+        .position = position,
+    };
     
     if (t.type == I_ID)
         t.attribute.INT_ATTR = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
@@ -196,14 +197,15 @@ Token LX_getString(Lexer *l) {
 #pragma region SYMBOLS
 
 Token LX_getSymbol(Lexer *l) {
-    char symbol = bufferReader_getCurrent(l->bufferReader);
+    char current = bufferReader_getCurrent(l->bufferReader);
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
 
-    bufferReader_moveNext(l->bufferReader);
+    Token t = {
+        .attribute.INT_ATTR = 0,
+        .position = position,
+    };
 
-    Token t;
-    t.attribute.INT_ATTR = 0;
-
-    switch (symbol) {
+    switch (current) {
         case '(':
             t.type = S_OPEN_PARENTHESIS;
             break;
@@ -233,14 +235,10 @@ Token LX_getSymbol(Lexer *l) {
             break;
 
         default:
-            fprintf(stderr, "Lexer Error: Invalid symbol: %c\n", symbol);
-            exit(1);
-            break;
+            LX_throwError(l, "Invalid symbol: %c\n", current);
     }
 
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
-    t.position = position;
-
+    bufferReader_moveNext(l->bufferReader);
     bufferReader_ignoreSelected(l->bufferReader);
 
     return t;
@@ -312,10 +310,9 @@ Token LX_getAsteriskToken(Lexer *l) {
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .position = position
+        .position = position,
+        .type = O_MULTIPLY,
     };
-
-    t.type = O_MULTIPLY;
 
     bufferReader_ignoreSelected(l->bufferReader);
 
@@ -416,10 +413,9 @@ Token LX_getPercentageToken(Lexer *l) {
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .position = position
+        .position = position,
+        .type = O_MOD,
     };
-
-    t.type = O_MOD;
 
     bufferReader_ignoreSelected(l->bufferReader);
 
