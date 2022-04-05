@@ -70,6 +70,8 @@ const char* getTokenTypeAsString(enum tokenType type) {
             return "O_MULTIPLY";
         case O_DIVIDE:
             return "O_DIVIDE";
+        case O_MOD:
+            return "O_MOD";
         case O_LESS:
             return "O_LESS";
         case O_LESS_EQUAL:
@@ -112,7 +114,7 @@ int main() {
 
     while (lexer_hasNext(l)) {
         Token t = lexer_getNextToken(l);
-        //printToken(t);
+        printToken(t);
     }
 
     lexer_free(l);

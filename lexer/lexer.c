@@ -394,6 +394,28 @@ Token LX_getSlashToken(Lexer *l) {
 
 #pragma endregion
 
+#pragma region PERCENTAGE
+
+Token LX_getPercentageToken(Lexer *l) {
+    bufferReader_moveNext(l->bufferReader);
+
+    const char current = bufferReader_getCurrent(l->bufferReader);
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
+
+    Token t = {
+        .attribute.INT_ATTR = 0,
+        .position = position
+    };
+
+    t.type = O_MOD;
+
+    bufferReader_ignoreSelected(l->bufferReader);
+
+    return t;
+}
+
+#pragma endregion
+
 #pragma region EQUAL
 
 Token LX_getEqualToken(Lexer *l) {
@@ -515,6 +537,10 @@ Token lexer_getNextToken(Lexer *l) {
                 
             case '/':
                 t = LX_getSlashToken(l);
+                break;
+
+            case '%':
+                t = LX_getPercentageToken(l);
                 break;
                 
             case '=':

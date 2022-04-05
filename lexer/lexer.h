@@ -50,6 +50,7 @@ enum tokenType {
     O_SUBTRACT,
     O_MULTIPLY,
     O_DIVIDE,
+    O_MOD,
     O_LESS,
     O_LESS_EQUAL,
     O_GREATER,
