@@ -156,22 +156,32 @@ Token LX_getName(Lexer *l) {
 
 #pragma endregion
 
+#pragma region STRING
+
 Token LX_getString(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
+
+    FilePosition position = bufferReader_getPosition(l->bufferReader);
     bufferReader_ignoreSelected(l->bufferReader);
 
-    while (!bufferReader_isEOF(l->bufferReader) && 
-            bufferReader_getCurrent(l->bufferReader) != '\"') {
+    while (!bufferReader_isEOF(l->bufferReader)) {
+        const char current = bufferReader_getCurrent(l->bufferReader);
+
+        if (current == '\n')
+            LX_throwError(l, "Multi-line strings are not allowed\n");
+        else if (current == '\"')
+            break;
+
         bufferReader_moveNext(l->bufferReader);
     }
 
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
     char *str = bufferReader_getSelected(l->bufferReader);
 
-    Token t;
-    t.type = V_STRING;
-    t.attribute.INT_ATTR = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str);
-    t.position = position;
+    Token t = {
+        .type = V_STRING,
+        .attribute.INT_ATTR = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str),
+        .position = position
+    };
 
     bufferReader_moveNext(l->bufferReader);
     bufferReader_ignoreSelected(l->bufferReader);
@@ -180,6 +190,8 @@ Token LX_getString(Lexer *l) {
 
     return t;
 }
+
+#pragma endregion
 
 #pragma region SYMBOLS
 
