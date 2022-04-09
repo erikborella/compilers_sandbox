@@ -146,6 +146,9 @@ int main() {
         exit(1);
     }
 
+    int optval = 1;
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const void*)&optval, sizeof(int));
+
     bzero(&servaddr, sizeof(servaddr));
 
     servaddr.sin_family = AF_INET;
