@@ -19,4 +19,4 @@ clean:
 	find . -type f -name *.o -delete
 
 dist-clean: clean
-	rm -rf a.out
+	rm -rf *.out
