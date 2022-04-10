@@ -37,6 +37,7 @@ ResponseCreator* responseCreator_init(enum content_type contentType,
         rc->contentType = contentType;
         rc->statusCode = statusCode;
         rc->contentSize = 0;
+        rc->head = NULL;
     }
 
     return rc;
@@ -84,7 +85,7 @@ void responseCreator_appendContent(ResponseCreator *rc, char *str) {
 
 char* responseCreator_getResponse(ResponseCreator *rc) {
     const char *headerTemplate = 
-        "HTTP/1.1 %u OK\r\n"
+        "HTTP/1.1 %u %s\r\n"
         "Server: Integrated Compiler Server\r\n"
         "Content-Type: %s\r\n"
         "Connection: Closed\r\n"
@@ -98,11 +99,18 @@ char* responseCreator_getResponse(ResponseCreator *rc) {
     else
         contentType = "plain/text";
 
+    const char* statusCodeInfo;
+    if (rc->statusCode == 404)
+        statusCodeInfo = "NOT FOUND";
+    else
+        statusCodeInfo = "OK";
+
     char headerStr[255];
-    sprintf(headerStr, headerTemplate, rc->statusCode, contentType);
+    sprintf(headerStr, headerTemplate, rc->statusCode, statusCodeInfo, contentType);
 
     char *contentStr = RC_mallocOrExitWithError(sizeof(char) * rc->contentSize + 3);
-    
+    bzero(contentStr, sizeof(char) * rc->contentSize + 3);
+
     struct content *no = rc->head;
     
     while (no != NULL) {
@@ -114,6 +122,7 @@ char* responseCreator_getResponse(ResponseCreator *rc) {
 
     const size_t responseSize = strlen(headerStr) + rc->contentSize;
     char *responseStr = RC_mallocOrExitWithError(sizeof(char) * responseSize);
+    bzero(responseStr, sizeof(char) * responseSize);
 
     strcpy(responseStr, headerStr);
     strcat(responseStr, contentStr);
