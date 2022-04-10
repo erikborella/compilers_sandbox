@@ -1,4 +1,7 @@
+#include "server.h"
+
 #include <stdio.h>
+#include <stdint.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdlib.h>
@@ -10,9 +13,23 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define MAX 1000000
-#define PORT 8080
+#define REQUEST_MAX_SIZE 1000000
+#define ROUTES_MAX_SIZE 2
 #define SA struct sockaddr
+
+typedef struct {
+    const char* path;
+    enum http_method method;
+    RouteCallback callback;
+} Route;
+
+struct server {
+    int sockfd;
+    int connfd;
+    Route routes[ROUTES_MAX_SIZE];
+    size_t routesPtr;
+    uint16_t port;
+};
 
 /*
     TCP sockets inspired by:
@@ -23,19 +40,7 @@
         - https://www.tutorialspoint.com/http/http_responses.htm
 */
 
-enum http_method {
-    HTTP_GET,
-    HTTP_POST,
-    HTTP_OTHER,
-};
-
-typedef struct {
-    enum http_method method;
-    char *route;
-    char *content;
-} Request;
-
-enum http_method getRequestHttpMethod(char request[MAX], size_t *requestPtr) {
+enum http_method SV_getRequestHttpMethod(char request[REQUEST_MAX_SIZE], size_t *requestPtr) {
     size_t methodLen = 0;
     
     *requestPtr = 0;
@@ -64,7 +69,7 @@ enum http_method getRequestHttpMethod(char request[MAX], size_t *requestPtr) {
     return method;
 }
 
-char* getRequestRoute(char request[MAX], size_t *requestPtr) {
+char* SV_getRequestPath(char request[REQUEST_MAX_SIZE], size_t *requestPtr) {
     size_t routeLen = 0;
 
     while (request[*requestPtr + routeLen] != ' ')
@@ -79,7 +84,7 @@ char* getRequestRoute(char request[MAX], size_t *requestPtr) {
     return route;
 }
 
-char* getRequestContent(char request[MAX], size_t requestLen) {
+char* SV_getRequestContent(char request[REQUEST_MAX_SIZE], size_t requestLen) {
     char *contentStart = strstr(request, "\r\n\r\n");
     contentStart = contentStart + 4;
 
@@ -94,115 +99,172 @@ char* getRequestContent(char request[MAX], size_t requestLen) {
     return content;
 }
 
-Request parseRequest(int connfd) {
-    char buff[MAX];
-    bzero(buff, MAX);
+Request SV_parseRequest(Server *s) {
+    char buff[REQUEST_MAX_SIZE];
+    bzero(buff, REQUEST_MAX_SIZE);
+
+    int connfd = s->connfd;
 
     ssize_t t = read(connfd, buff, sizeof(buff));
     size_t requestPtr = 0;
 
     Request request;
 
-    request.method = getRequestHttpMethod(buff, &requestPtr);
-    request.route = getRequestRoute(buff, &requestPtr);
-    request.content = getRequestContent(buff, t);
-
-    printf("Route: %s\n", request.route);
-    printf("Method: %d\n", request.method);
-    printf("Content:\n%s\n\n", request.content);
+    request.method = SV_getRequestHttpMethod(buff, &requestPtr);
+    request.path = SV_getRequestPath(buff, &requestPtr);
+    request.content = SV_getRequestContent(buff, t);
 
     return request;
 }
 
-void freeRequest(Request request) {
-    free(request.route);
+void SV_freeRequest(Request request) {
+    free(request.path);
     free(request.content);
 }
 
-void handleRequest(int connfd) {
-    const char str[] = 
-        "HTTP/1.1 200 OK\r\n"
-        "Server: Integrated Compiler Server\r\n"
-        "Content-Type: text/html\r\n"
-        "Connection: Closed\r\n"
-        "\r\n"
-        "<html><body><h1>Hello, World!</h1></body></html>\r\n";
+char* SV_solveRouteAndGetResponse(Server *s, Request request) {
+    for (int i = 0; i < s->routesPtr; i++) {
+        const Route currentRoute = s->routes[i];
 
-    Request r = parseRequest(connfd);
+        if (currentRoute.method == request.method && strcmp(currentRoute.path, request.path) == 0) {
+            ResponseCreator* rc = currentRoute.callback(request);
 
-    freeRequest(r);
+            char* response = responseCreator_getResponse(rc);
+            responseCreator_free(rc);
 
-    write(connfd, str, sizeof(str)-1);
+            return response;
+        }
+    }
+
+    ResponseCreator* rc = responseCreator_init(TYPE_JSON, 404);
+
+    char* response = responseCreator_getResponse(rc);
+    responseCreator_free(rc);
+
+    return response;
 }
 
-int main() {
-    int sockfd, connfd, len;
+void SV_handleRequest(Server *s) {
+    Request request = SV_parseRequest(s);
+
+    char* response = SV_solveRouteAndGetResponse(s, request);
+
+    write(s->connfd, response, strlen(response)-1);
+    
+    free(response);
+    SV_freeRequest(request);
+}
+
+Server* server_init(uint16_t port) {
+    Server* s = (Server*) malloc(sizeof(Server));
+
+    if (s != NULL) {
+        s->sockfd = 0;
+        s->connfd = 0;
+        
+        s->port = port;
+
+        s->routesPtr = 0;
+    }
+
+    return s;
+}
+
+void server_free(Server *s) {
+    if (s->sockfd != 0)
+        close(s->sockfd);
+
+    if (s->connfd != 0)
+        close(s->connfd);
+
+    free(s);
+}
+
+void server_addRoute(Server *s, const char *path, 
+                     enum http_method method, RouteCallback callback) {
+    
+    if (s->routesPtr == ROUTES_MAX_SIZE) {
+        fprintf(stderr, "Server Error => server_addRoute: There is no more space to add routes\n");
+        exit(1);
+    }
+
+    Route route = {
+        .path = path,
+        .method = method,
+        .callback = callback,
+    };
+
+    s->routes[s->routesPtr] = route;
+    s->routesPtr++;
+}
+
+void server_start(Server *s) {
+    int cliLen;
     struct sockaddr_in servaddr, cli;
     struct hostent *hostp;
 
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1) {
-        fprintf(stderr, "Server Error: Socket creation failed\n");
+    s->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (s->sockfd == -1) {
+        fprintf(stderr, "Server Error => server_start: Socket creation failed\n");
         exit(1);
     }
 
     int optval = 1;
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const void*)&optval, sizeof(int));
+    setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, 
+        (const void*) &optval, sizeof(int));
 
     bzero(&servaddr, sizeof(servaddr));
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_port = htons(PORT);
+    servaddr.sin_port = htons(s->port);
 
-    if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) {
-        fprintf(stderr, "Server Error: Socket bind failed\n");
+    if ((bind(s->sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) {
+        fprintf(stderr, "Server Error => server_start: Socket bind failed\n");
         exit(1);
     }
 
-    if (listen(sockfd, 5) != 0) {
-        fprintf(stderr, "Server Error: Listen failed\n");
+    if (listen(s->sockfd, 5) != 0) {
+        fprintf(stderr, "Server Error => server_start: Listen failed\n");
         exit(1);
     }
 
-    printf("Server listening on port: %d\n", PORT);
+    printf("Server listening on port: %d\n", s->port);
 
-    len = sizeof(cli);
+    cliLen = sizeof(cli);
 
     while (true) {
         char *hostaddrp;
 
-        connfd = accept(sockfd, (SA*)&cli, &len);
+        s->connfd = accept(s->sockfd, (SA*)&cli, &cliLen);
 
-        if (connfd < 0) {
-            fprintf(stderr, "Server Error: Accept failed\n");
+        if (s->connfd < 0) {
+            fprintf(stderr, "Server Error => server_start: Accept failed\n");
             exit(1);
         }
 
-        hostp = gethostbyaddr((const char*) &cli.sin_addr.s_addr, 
+        hostp = gethostbyaddr((const char*) &cli.sin_addr.s_addr,
             sizeof(cli.sin_addr.s_addr), AF_INET);
 
         if (hostp == NULL) {
-            fprintf(stderr, "Server Error: Error on gethostbyaddr\n");
+            fprintf(stderr, "Server Error => server_start: Error on gethostbyaddr\n");
             exit(1);
         }
 
         hostaddrp = inet_ntoa(cli.sin_addr);
 
         if (hostaddrp == NULL) {
-            fprintf(stderr, "Server Error: Error on inet_ntoa\n");
+            fprintf(stderr, "Server Error => server_start: Error on inet_ntoa\n");
             exit(1);
         }
 
-        printf("server established connection with %s (%s)\n", 
+        printf("Server established connection with %s (%s)\n", 
 	        hostp->h_name, hostaddrp);
 
-        handleRequest(connfd);
+        SV_handleRequest(s);
 
-        close(connfd);
+        close(s->connfd);
     }
 
-    close(sockfd);
-
-    return 0;
+    close(s->sockfd);
 }

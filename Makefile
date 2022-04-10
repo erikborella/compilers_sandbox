@@ -1,6 +1,6 @@
 CC=gcc
-#CFLAGS=-O2  # to release compile
-CFLAGS=-O0 -g  # uncomment to debug
+CFLAGS=-O2  # to release compile
+#CFLAGS=-O0 -g  # uncomment to debug
 
 .PHONY: all main server clean dist-clean
 
@@ -11,7 +11,8 @@ a.out: main.o lexer/lexer.o symbolsTable/symbolsTable.o lexer/bufferReader/buffe
 	$(CC) $(CFLAGS) -o $@ $+
 
 server: server.out
-server.out: extras/server/server.o lexer/lexer.o symbolsTable/symbolsTable.o lexer/bufferReader/bufferReader.o
+server.out: serverRunner.o extras/server/server.o extras/server/responseCreator/responseCreator.o \
+			lexer/lexer.o symbolsTable/symbolsTable.o lexer/bufferReader/bufferReader.o
 	$(CC) $(CFLAGS) -o $@ $+
 
 clean:
