@@ -43,7 +43,7 @@ size_t ST_findByName(SymbolsTable* st, char* name) {
 size_t ST_add(SymbolsTable* st, char* name) {
     struct symbol *no = ST_mallocOrExitWithError(sizeof(struct symbol));
 
-    char *nameCopy = ST_mallocOrExitWithError(sizeof(char) * strlen(name));
+    char *nameCopy = ST_mallocOrExitWithError(sizeof(char) * strlen(name) + 1);
     strcpy(nameCopy, name);
 
     st->idCounter++;

@@ -62,7 +62,7 @@ void responseCreator_appendContent(ResponseCreator *rc, char *str) {
     
     const size_t strSize = strlen(str);
 
-    char *strCopy = RC_mallocOrExitWithError(sizeof(char) * strSize);
+    char *strCopy = RC_mallocOrExitWithError(sizeof(char) * strSize + 1);
     strcpy(strCopy, str);
 
     rc->contentSize += strSize;
@@ -121,7 +121,7 @@ char* responseCreator_getResponse(ResponseCreator *rc) {
     strcat(contentStr, "\r\n");
 
     const size_t responseSize = strlen(headerStr) + rc->contentSize;
-    char *responseStr = RC_mallocOrExitWithError(sizeof(char) * responseSize);
+    char *responseStr = RC_mallocOrExitWithError(sizeof(char) * responseSize + 1);
     bzero(responseStr, sizeof(char) * responseSize);
 
     strcpy(responseStr, headerStr);
