@@ -8,7 +8,7 @@
       :expand-on-hover="navbarIsExpanded" >
 
       <v-list>
-        <v-list-item :to="'/'" append>
+        <v-list-item :to="'/lexer'" append>
           <v-list-item-icon>
             <v-icon>mdi-text-recognition</v-icon>
           </v-list-item-icon>

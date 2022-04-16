@@ -7,8 +7,12 @@ Vue.use(VueRouter);
 const routes: Array<RouteConfig> = [
   {
     path: "/",
-    name: "home",
-    component: () => import("../views/HomeView.vue"),
+    redirect: "/lexer",
+  },
+  {
+    path: "/lexer",
+    name: "lexer",
+    component: () => import("../views/LexerView.vue"),
   },
 ];
 
