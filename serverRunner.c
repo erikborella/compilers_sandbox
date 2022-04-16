@@ -37,10 +37,10 @@ ResponseCreator* lexer(Request r) {
             "\"type\": \"%s\","
             "\"position\": {"
                 "\"line\": %d,"
-                "\"column\": %d,"
+                "\"column\": %d"
             "},"
             "\"attr\": %s"
-        "},\0";
+        "}\0";
 
     char* tempFilePath = createTempCodeFile(r.content);
     char buff[255];
@@ -65,6 +65,9 @@ ResponseCreator* lexer(Request r) {
             t.position.line, t.position.column, attrBuff);
 
         responseCreator_appendContent(rc, buff);
+
+        if (lexer_hasNext(l))
+            responseCreator_appendContent(rc, ",");
     }
 
     responseCreator_appendContent(rc, "]");
@@ -80,7 +83,7 @@ ResponseCreator* lexer(Request r) {
 
 int main() {
 
-    Server* s = server_init(8080);
+    Server* s = server_init(8000);
 
     server_addRoute(s, "/lexer", HTTP_POST, lexer);
 

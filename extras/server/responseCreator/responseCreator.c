@@ -89,6 +89,7 @@ char* responseCreator_getResponse(ResponseCreator *rc) {
         "Server: Integrated Compiler Server\r\n"
         "Content-Type: %s\r\n"
         "Connection: Closed\r\n"
+        "Access-Control-Allow-Origin: *\r\n"
         "\r\n";
 
     const char *contentType;
@@ -120,11 +121,11 @@ char* responseCreator_getResponse(ResponseCreator *rc) {
 
     strcat(contentStr, "\r\n");
 
-    const size_t responseSize = strlen(headerStr) + rc->contentSize;
-    char *responseStr = RC_mallocOrExitWithError(sizeof(char) * responseSize + 1);
+    const size_t responseSize = strlen(headerStr) + rc->contentSize + 1;
+    char *responseStr = RC_mallocOrExitWithError(sizeof(char) * responseSize);
     bzero(responseStr, sizeof(char) * responseSize);
 
-    strcpy(responseStr, headerStr);
+    strncpy(responseStr, headerStr, strlen(headerStr));
     strcat(responseStr, contentStr);
 
     free(contentStr);

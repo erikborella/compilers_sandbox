@@ -89,9 +89,9 @@ char* SV_getRequestContent(char request[REQUEST_MAX_SIZE], size_t requestLen) {
     contentStart = contentStart + 4;
 
     const size_t contentLen = requestLen - (contentStart - request);
-    const size_t mallocSize = sizeof(char) * contentLen;
+    const size_t mallocSize = sizeof(char) * contentLen + 1;
 
-    char *content = malloc(sizeof(char) * contentLen);
+    char *content = malloc(mallocSize);
     bzero(content, mallocSize);
 
     strcpy(content, contentStart);
