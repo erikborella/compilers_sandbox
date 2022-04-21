@@ -121,7 +121,7 @@ char* responseCreator_getResponse(ResponseCreator *rc) {
 
     strcat(contentStr, "\r\n");
 
-    const size_t responseSize = strlen(headerStr) + rc->contentSize + 1;
+    const size_t responseSize = strlen(headerStr) + strlen(contentStr) + 1;
     char *responseStr = RC_mallocOrExitWithError(sizeof(char) * responseSize);
     bzero(responseStr, sizeof(char) * responseSize);
 
