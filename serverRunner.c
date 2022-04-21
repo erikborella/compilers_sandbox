@@ -7,8 +7,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
+
+static volatile Server* serverReference = NULL;
 
 const char* getTokenTypeAsString(enum tokenType type);
+
+void intHandler(int num) {
+    if (serverReference != NULL)
+        server_free((Server*) serverReference);
+
+    exit(num);
+}
 
 char* createTempCodeFile(const char *content) {
     char tempFilePath[] = "tempCode.XXXXXX";
@@ -82,8 +92,10 @@ ResponseCreator* lexer(Request r) {
 }
 
 int main() {
+    signal(SIGINT, intHandler);
 
     Server* s = server_init(8000);
+    serverReference = s;
 
     server_addRoute(s, "/lexer", HTTP_POST, lexer);
 
