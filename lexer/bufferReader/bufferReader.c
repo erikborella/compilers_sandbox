@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <string.h>
 
 struct bufferReader {
     FILE* sourceFile;
@@ -88,6 +89,8 @@ BufferReader* bufferReader_init(const char* sourceFilePath, size_t bufferSize) {
 
         //Double the buffer size to use the double buffer technique
         br->buffer = BR_mallocOrExitWithError(sizeof(char) * (bufferSize * 2));
+        memset(br->buffer, 0, sizeof(char) * (bufferSize * 2));
+
         br->loadFirstPart = true;
         br->startPtr = 0;
         br->endPtr = 0;
