@@ -55,7 +55,7 @@ export default Vue.extend({
 
   methods: {
     openGithubPage() {
-      window.open("https://github.com/erikborella/compilers_sandbox/tree/server", "_blank")
+      window.open("https://github.com/erikborella/compilers_sandbox", "_blank")
         ?.focus();
     }
   },
