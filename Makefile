@@ -16,7 +16,7 @@ server.out: serverRunner.o extras/server/server.o extras/server/responseCreator/
 	$(CC) $(CFLAGS) -o $@ $+
 
 clean:
-	find . -type f -name *.o -delete
+	find . -type f -name '*.o' -delete
 
 dist-clean: clean
 	rm -rf *.out
