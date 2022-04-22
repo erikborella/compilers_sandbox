@@ -586,8 +586,11 @@ Token lexer_getNextToken(Lexer *l) {
 }
 
 bool lexer_hasNext(Lexer *l) {
-    while (!bufferReader_isEOF(l->bufferReader) && bufferReader_getCurrent(l->bufferReader) == '\n') {
+    char current = bufferReader_getCurrent(l->bufferReader);
+
+    while (!bufferReader_isEOF(l->bufferReader) && isspace(current)) {
         bufferReader_moveNext(l->bufferReader);
+        current = bufferReader_getCurrent(l->bufferReader);
     }
 
     bufferReader_ignoreSelected(l->bufferReader);
