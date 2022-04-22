@@ -178,3 +178,5 @@ $ npm run serve
 ```
 > You also need to run the Compiler Server, see the [Basics](#0-basics) section
 3. Acess `localhost:8080/` in your browser.
+
+![Captura de tela de 2022-04-21 22-17-00](https://user-images.githubusercontent.com/27148919/164577649-d51e6aa1-bffb-45eb-a8ac-0278789ed138.png)
