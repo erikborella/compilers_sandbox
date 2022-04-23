@@ -50,7 +50,7 @@ enum http_method SV_getRequestHttpMethod(char request[REQUEST_MAX_SIZE], size_t 
 
     const size_t mallocSize = sizeof(char) * methodLen + 1;
     char *strMethod = malloc(mallocSize);
-    bzero(strMethod, mallocSize);
+    memset(strMethod, 0, mallocSize);
 
     strncpy(strMethod, request, methodLen);
 
@@ -77,7 +77,7 @@ char* SV_getRequestPath(char request[REQUEST_MAX_SIZE], size_t *requestPtr) {
 
     const size_t mallocSize = sizeof(char) * routeLen + 1;
     char *route = malloc(mallocSize);
-    bzero(route, mallocSize);
+    memset(route, 0, mallocSize);
 
     strncpy(route, request + *requestPtr, routeLen);
 
@@ -92,7 +92,7 @@ char* SV_getRequestContent(char request[REQUEST_MAX_SIZE], size_t requestLen) {
     const size_t mallocSize = sizeof(char) * contentLen + 1;
 
     char *content = malloc(mallocSize);
-    bzero(content, mallocSize);
+    memset(content, 0, mallocSize);
 
     strcpy(content, contentStart);
 
@@ -101,7 +101,7 @@ char* SV_getRequestContent(char request[REQUEST_MAX_SIZE], size_t requestLen) {
 
 Request SV_parseRequest(Server *s) {
     char buff[REQUEST_MAX_SIZE];
-    bzero(buff, REQUEST_MAX_SIZE);
+    memset(buff, 0, REQUEST_MAX_SIZE);
 
     int connfd = s->connfd;
 
@@ -213,7 +213,7 @@ void server_start(Server *s) {
     setsockopt(s->sockfd, SOL_SOCKET, SO_REUSEADDR, 
         (const void*) &optval, sizeof(int));
 
-    bzero(&servaddr, sizeof(servaddr));
+    memset(&servaddr, 0, sizeof(servaddr));
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);

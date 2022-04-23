@@ -110,7 +110,7 @@ char* responseCreator_getResponse(ResponseCreator *rc) {
     sprintf(headerStr, headerTemplate, rc->statusCode, statusCodeInfo, contentType);
 
     char *contentStr = RC_mallocOrExitWithError(sizeof(char) * rc->contentSize + 3);
-    bzero(contentStr, sizeof(char) * rc->contentSize + 3);
+    memset(contentStr, 0, sizeof(char) * rc->contentSize + 3);
 
     struct content *no = rc->head;
     
@@ -123,7 +123,7 @@ char* responseCreator_getResponse(ResponseCreator *rc) {
 
     const size_t responseSize = strlen(headerStr) + strlen(contentStr) + 1;
     char *responseStr = RC_mallocOrExitWithError(sizeof(char) * responseSize);
-    bzero(responseStr, sizeof(char) * responseSize);
+    memset(responseStr, 0, sizeof(char) * responseSize);
 
     strncpy(responseStr, headerStr, strlen(headerStr));
     strcat(responseStr, contentStr);
