@@ -100,16 +100,17 @@ BufferReader* bufferReader_init(const char* sourceFilePath, size_t bufferSize) {
         memset(br->buffer, 0, sizeof(char) * (bufferSize * 2));
 
         br->loadFirstPart = true;
-        br->isNewLine = false;
+        br->isNewLine = true;
 
         br->startPtr = 0;
         br->endPtr = 0;
 
-        FilePosition startFile =  {.line = 1, .column = 1};
+        FilePosition startFile =  {.line = 0, .column = 0};
         br->startPosition = startFile;
         br->endPosition = startFile;
 
         BR_loadChunk(br);
+        BR_updateEndPosition(br, br->buffer[0]);
     }
 
     return br;
