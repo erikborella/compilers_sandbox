@@ -63,7 +63,7 @@ enum tokenType {
 
 typedef struct {
     enum tokenType type;
-    FilePosition position;
+    FileLocation location;
     union {
         int INT_ATTR;
         double FLOAT_ATTR;  

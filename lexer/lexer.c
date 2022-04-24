@@ -38,10 +38,10 @@ struct lexer {
 
 void LX_throwError(Lexer *l, const char* msg, ...) {
     bufferReader_ignoreSelected(l->bufferReader);
-    FilePosition errorPosition = bufferReader_getPosition(l->bufferReader);
+    FileLocation errorPosition = bufferReader_getLocation(l->bufferReader);
 
     fprintf(stderr, "Lexer Error -> L:%ld C:%ld: ",
-        errorPosition.line, errorPosition.column);
+        errorPosition.start.line, errorPosition.start.column);
 
     va_list arg_ptr;
 
@@ -75,13 +75,13 @@ Token LX_getFloatNumber(Lexer *l) {
 
     LX_moveWhileIsNumber(l);
 
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
     char *str = bufferReader_getSelected(l->bufferReader);
     
     Token t = {
         .type = V_NUM_FLOAT,
         .attribute.FLOAT_ATTR = strtod(str, NULL),
-        .position = position
+        .location = location
     };
 
     free(str);
@@ -89,13 +89,13 @@ Token LX_getFloatNumber(Lexer *l) {
 }
 
 Token LX_getIntNumber(Lexer *l) {
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t = {
         .type = V_NUM_INT,
         .attribute.INT_ATTR = strtoll(str, NULL, 10),
-        .position = position
+        .location = location
     };
 
     free(str);
@@ -137,12 +137,12 @@ Token LX_getName(Lexer *l) {
         bufferReader_moveNext(l->bufferReader);
     }
 
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t = {
         .type = LX_getNameType(str),
-        .position = position,
+        .location = location,
     };
     
     if (t.type == I_ID)
@@ -162,7 +162,7 @@ Token LX_getName(Lexer *l) {
 Token LX_getString(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
     bufferReader_ignoreSelected(l->bufferReader);
 
     while (!bufferReader_isEOF(l->bufferReader)) {
@@ -181,7 +181,7 @@ Token LX_getString(Lexer *l) {
     Token t = {
         .type = V_STRING,
         .attribute.INT_ATTR = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str),
-        .position = position
+        .location = location
     };
 
     bufferReader_moveNext(l->bufferReader);
@@ -198,11 +198,9 @@ Token LX_getString(Lexer *l) {
 
 Token LX_getSymbol(Lexer *l) {
     char current = bufferReader_getCurrent(l->bufferReader);
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
 
     Token t = {
-        .attribute.INT_ATTR = 0,
-        .position = position,
+        .attribute.INT_ATTR = 0
     };
 
     switch (current) {
@@ -239,6 +237,10 @@ Token LX_getSymbol(Lexer *l) {
     }
 
     bufferReader_moveNext(l->bufferReader);
+
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
+    t.location = location;
+
     bufferReader_ignoreSelected(l->bufferReader);
 
     return t;
@@ -252,11 +254,11 @@ Token LX_getPlusToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .position = position
+        .location = location
     };
 
     if (current == '+') {
@@ -279,11 +281,11 @@ Token LX_getMinusToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .position = position
+        .location = location
     };
 
     if (current == '-') {
@@ -306,11 +308,11 @@ Token LX_getAsteriskToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .position = position,
+        .location = location,
         .type = O_MULTIPLY,
     };
 
@@ -331,13 +333,13 @@ Token LX_getLineComment(Lexer *l) {
 
     bufferReader_moveNext(l->bufferReader);
     
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
     bufferReader_ignoreSelected(l->bufferReader);
 
     Token t = {
         .type = C_LINE_COMMENT,
         .attribute.INT_ATTR = 0,
-        .position = position
+        .location = location
     };
 
     return t;
@@ -362,27 +364,27 @@ Token LX_getBlockComment(Lexer *l) {
         }
     }
 
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
     bufferReader_ignoreSelected(l->bufferReader);
 
     Token t = {
         .type = C_BLOCK_COMMENT,
         .attribute.INT_ATTR = 0,
-        .position = position,
+        .location = location,
     };
 
     return t;
 }
 
 Token LX_getDivideOperator(Lexer *l) {
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
     bufferReader_ignoreSelected(l->bufferReader);
 
 
     Token t = {
         .type = O_DIVIDE,
         .attribute.INT_ATTR = 0,
-        .position = position,
+        .location = location,
     };
 
     return t;
@@ -409,11 +411,11 @@ Token LX_getPercentageToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .position = position,
+        .location = location,
         .type = O_MOD,
     };
 
@@ -430,11 +432,11 @@ Token LX_getEqualToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .position = position
+        .location = location
     };
 
     if (current == '=') {
@@ -457,11 +459,11 @@ Token LX_getGreaterToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .position = position
+        .location = location
     };
 
     if (current == '=') {
@@ -484,11 +486,11 @@ Token LX_getLessToken(Lexer *l) {
      bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FilePosition position = bufferReader_getPosition(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .position = position
+        .location = location
     };
 
     if (current == '=') {

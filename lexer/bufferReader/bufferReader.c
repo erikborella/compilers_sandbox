@@ -161,6 +161,11 @@ void bufferReader_ignoreSelected(BufferReader* br) {
     BR_finishSelection(br);
 }
 
-FilePosition bufferReader_getPosition(BufferReader* br) {
-    return br->startPosition;
+FileLocation bufferReader_getLocation(BufferReader* br) {
+    FileLocation location = {
+        .start = br->startPosition,
+        .end = br->endPosition,
+    };
+
+    return location;
 }

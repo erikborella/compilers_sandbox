@@ -92,18 +92,16 @@ const char* getTokenTypeAsString(enum tokenType type) {
 }
 
 void printToken(Token t) {
-    if (t.type == V_NUM_FLOAT) {
-        printf("Token => type: %s\n\tposition: L:%ld C:%ld\n\tattr: %f\n\n",
-            getTokenTypeAsString(t.type),
-            t.position.line, t.position.column,
-            t.attribute.FLOAT_ATTR);
-    }
-    else {
-        printf("Token => type: %s\n\tposition: L:%ld C:%ld\n\tattr: %d\n\n",
-            getTokenTypeAsString(t.type),
-            t.position.line, t.position.column,
-            t.attribute.INT_ATTR);
-    }
+    printf("Token => type: %s\n"
+           "\tPosition => start %ld:%ld ; end %ld:%ld\n",
+           getTokenTypeAsString(t.type),
+           t.location.start.line, t.location.start.column,
+           t.location.end.line, t.location.end.column);
+
+    if (t.type == V_NUM_FLOAT)
+        printf("\tattr: %f\n\n", t.attribute.FLOAT_ATTR);
+    else
+        printf("\tattr: %d\n\n", t.attribute.INT_ATTR);
 }
 
 int main() {

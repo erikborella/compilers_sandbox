@@ -45,9 +45,15 @@ ResponseCreator* lexer(Request r) {
     const char *tokenJsonTemplate = 
         "{"
             "\"type\": \"%s\","
-            "\"position\": {"
-                "\"line\": %d,"
-                "\"column\": %d"
+            "\"location\": {"
+                "\"start\": {"
+                    "\"line\": %d,"
+                    "\"column\": %d"    
+                "},"
+                "\"end\": {"
+                    "\"line\": %d,"
+                    "\"column\": %d"    
+                "}"
             "},"
             "\"attr\": %s"
         "}\0";
@@ -72,7 +78,9 @@ ResponseCreator* lexer(Request r) {
             sprintf(attrBuff, "%d", t.attribute.INT_ATTR);
 
         sprintf(buff, tokenJsonTemplate, getTokenTypeAsString(t.type), 
-            t.position.line, t.position.column, attrBuff);
+            t.location.start.line, t.location.start.column, 
+            t.location.end.line, t.location.end.column,
+            attrBuff);
 
         responseCreator_appendContent(rc, buff);
 

@@ -9,6 +9,11 @@ typedef struct {
     size_t column;
 } FilePosition;
 
+typedef struct {
+    FilePosition start;
+    FilePosition end;
+} FileLocation;
+
 typedef struct bufferReader BufferReader;
 
 BufferReader* bufferReader_init(const char* sourceFilePath, size_t bufferSize);
@@ -19,6 +24,6 @@ void bufferReader_moveNext(BufferReader* br);
 char bufferReader_getCurrent(BufferReader* br);
 char* bufferReader_getSelected(BufferReader* br);
 void bufferReader_ignoreSelected(BufferReader* br);
-FilePosition bufferReader_getPosition(BufferReader* br);
+FileLocation bufferReader_getLocation(BufferReader* br);
 
 #endif
