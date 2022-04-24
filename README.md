@@ -34,7 +34,7 @@ $ ./server.out
 
 ---
 ## 1. Lexer
-One implementation of a Lexer to generate token from Java based code.
+One implementation of a Lexer to generate token from C based code.
 ### Usage:
 1. The Lexer needs a Symbols Table to work, create it with:
 ```c
