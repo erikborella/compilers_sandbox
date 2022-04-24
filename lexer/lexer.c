@@ -254,11 +254,9 @@ Token LX_getPlusToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .location = location
     };
 
     if (current == '+') {
@@ -267,6 +265,8 @@ Token LX_getPlusToken(Lexer *l) {
     }
     else
         t.type = O_ADD;
+
+    t.location = bufferReader_getLocation(l->bufferReader);
 
     bufferReader_ignoreSelected(l->bufferReader);
 
@@ -281,11 +281,9 @@ Token LX_getMinusToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .location = location
     };
 
     if (current == '-') {
@@ -294,6 +292,8 @@ Token LX_getMinusToken(Lexer *l) {
     }
     else
         t.type = O_SUBTRACT;
+
+    t.location = bufferReader_getLocation(l->bufferReader);
 
     bufferReader_ignoreSelected(l->bufferReader);
 
@@ -331,9 +331,9 @@ Token LX_getLineComment(Lexer *l) {
     while (!bufferReader_isEOF(l->bufferReader) && bufferReader_getCurrent(l->bufferReader) != '\n')
         bufferReader_moveNext(l->bufferReader);
 
-    bufferReader_moveNext(l->bufferReader);
-    
     FileLocation location = bufferReader_getLocation(l->bufferReader);
+
+    bufferReader_moveNext(l->bufferReader);
     bufferReader_ignoreSelected(l->bufferReader);
 
     Token t = {
@@ -432,11 +432,9 @@ Token LX_getEqualToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .location = location
     };
 
     if (current == '=') {
@@ -445,6 +443,8 @@ Token LX_getEqualToken(Lexer *l) {
     } 
     else
         t.type = S_ATTRIBUTION;
+
+    t.location = bufferReader_getLocation(l->bufferReader);
 
     bufferReader_ignoreSelected(l->bufferReader);
 
@@ -459,11 +459,9 @@ Token LX_getGreaterToken(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .location = location
     };
 
     if (current == '=') {
@@ -472,6 +470,8 @@ Token LX_getGreaterToken(Lexer *l) {
     } 
     else
         t.type = O_GREATER;
+
+    t.location = bufferReader_getLocation(l->bufferReader);
 
     bufferReader_ignoreSelected(l->bufferReader);
 
@@ -486,11 +486,9 @@ Token LX_getLessToken(Lexer *l) {
      bufferReader_moveNext(l->bufferReader);
 
     const char current = bufferReader_getCurrent(l->bufferReader);
-    FileLocation location = bufferReader_getLocation(l->bufferReader);
 
     Token t = {
         .attribute.INT_ATTR = 0,
-        .location = location
     };
 
     if (current == '=') {
@@ -499,6 +497,8 @@ Token LX_getLessToken(Lexer *l) {
     } 
     else
         t.type = O_LESS;
+
+    t.location = bufferReader_getLocation(l->bufferReader);
 
     bufferReader_ignoreSelected(l->bufferReader);
 
