@@ -10,6 +10,7 @@ struct bufferReader {
     FILE* sourceFile;
     size_t bufferSize;
     char* buffer;
+    bool isNewLine;
     bool loadFirstPart;
     size_t startPtr;
     size_t endPtr;
@@ -71,13 +72,20 @@ void BR_finishSelection(BufferReader* br) {
 }
 
 void BR_updateEndPosition(BufferReader* br, char ch) {
-    if (ch == '\n') {
+    if (br->isNewLine) {
         br->endPosition.line++;
-        br->endPosition.column = 0;
+        br->endPosition.column = 1;
+
+        if (ch != '\n')
+            br->isNewLine = false;
+            
+        return;
     }
-    else {
-        br->endPosition.column++;
-    }
+
+    if (ch == '\n')
+        br->isNewLine = true;
+
+    br->endPosition.column++;
 }
 
 BufferReader* bufferReader_init(const char* sourceFilePath, size_t bufferSize) {
@@ -92,6 +100,8 @@ BufferReader* bufferReader_init(const char* sourceFilePath, size_t bufferSize) {
         memset(br->buffer, 0, sizeof(char) * (bufferSize * 2));
 
         br->loadFirstPart = true;
+        br->isNewLine = false;
+
         br->startPtr = 0;
         br->endPtr = 0;
 
