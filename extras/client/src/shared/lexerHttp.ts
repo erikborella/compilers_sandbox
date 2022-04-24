@@ -2,9 +2,15 @@ import axios from "axios";
 
 export interface IToken {
     type: string;
-    position: {
-        line: number;
-        column: number;
+    location: {
+        start: {
+            line: number;
+            column: number;    
+        },
+        end: {
+            line: number;
+            column: number;
+        }
     },
     attr: number;
 }
