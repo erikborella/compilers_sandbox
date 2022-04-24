@@ -75,8 +75,10 @@ symbolsTable_free(st);
 
 #### 1. Disclaimer
 
-I created a web server from scratch using only TCP sockets, you can see more about it implementation in `extras/server` including the references that was consulted about sockets itself and HTTP responses. \
-However it's not perfect yet. It works to delivery content in json with simples requests (probably there's some bugs yet), but to serve HTTP pages like in Chrome it doesn't really work well because Chrome and other brower send a lot of extras request that make the server crash in some point. \
+I created a web server from scratch using only TCP sockets, you can see more about it implementation in `extras/server` including the references that was consulted about sockets itself and HTTP responses.
+
+However it's not perfect yet. It works to delivery content in json with simples requests (probably there's some bugs yet), but to serve HTTP pages like in Chrome it doesn't really work well because Chrome and other browers sends a lot of extras request that make the server crash in some point.
+
 Also it's not complete yet, there's a lot of thing missing like some body parser (you can only deal with raw payload yet) and other things.
 
 #### 2. Usage:
