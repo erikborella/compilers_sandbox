@@ -162,9 +162,6 @@ Token LX_getName(Lexer *l) {
 Token LX_getString(Lexer *l) {
     bufferReader_moveNext(l->bufferReader);
 
-    FileLocation location = bufferReader_getLocation(l->bufferReader);
-    bufferReader_ignoreSelected(l->bufferReader);
-
     while (!bufferReader_isEOF(l->bufferReader)) {
         const char current = bufferReader_getCurrent(l->bufferReader);
 
@@ -176,16 +173,15 @@ Token LX_getString(Lexer *l) {
         bufferReader_moveNext(l->bufferReader);
     }
 
+    bufferReader_moveNext(l->bufferReader);
+    FileLocation location = bufferReader_getLocation(l->bufferReader);
     char *str = bufferReader_getSelected(l->bufferReader);
 
     Token t = {
         .type = V_STRING,
         .attribute.INT_ATTR = symbolsTable_getIdOrAddSymbol(l->symbolsTable, str),
-        .location = location
+        .location = location,
     };
-
-    bufferReader_moveNext(l->bufferReader);
-    bufferReader_ignoreSelected(l->bufferReader);
 
     free(str);
 
